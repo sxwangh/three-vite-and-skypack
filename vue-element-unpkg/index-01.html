@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue 2 + Element UI</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-table
+            :data="tableData"
+            :span-method="objectSpanMethod"
+            :row-class-name="getRowClassName"
+            border
+            style="width: 100%">
+        <el-table-column prop="acNo" label="项目号" width="180"></el-table-column>
+        <el-table-column prop="acName" label="项目名称"></el-table-column>
+        <el-table-column prop="level" label="级别"></el-table-column>
+        <el-table-column prop="user" label="角色人员"></el-table-column>
+        <el-table-column prop="role" label="角色"></el-table-column>
+        <el-table-column prop="status" label="提醒状态"></el-table-column>
+        <el-table-column prop="number" label="数量"></el-table-column>
+        <el-table-column prop="number" label="数量"></el-table-column>
+        <el-table-column prop="sales" label="销量"></el-table-column>
+    </el-table>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                groupProperty: ['acNo', 'acName', 'level'],
+                totalLabelProperty: 'user',
+                totalCountProperty: ['number', 'sales'],
+                tableData: [
+                    {
+                        acNo: 'AC_0001',
+                        acName: '项目1',
+                        level: '一级',
+                        user: '王思雪',
+                        role: '管理员',
+                        status: 'status1...',
+                        number: 2,
+                        sales: 100
+                    },
+                    {
+                        acNo: 'AC_0001',
+                        acName: '项目1',
+                        level: '一级',
+                        user: '马里奥',
+                        role: '技术人员',
+                        status: 'status2...',
+                        number: 3,
+                        sales: 20
+                    },
+                    {
+                        total: true,
+                        acNo: 'AC_0001',
+                        acName: '项目1',
+                        level: '一级',
+                        user: '总计',
+                        role: '-',
+                        status: '-',
+                        number: 5,
+                        sales: 120
+                    },
+                    {
+                        acNo: 'AC_0002',
+                        acName: '项目2',
+                        level: '二级',
+                        user: '张张',
+                        role: '开发',
+                        status: 'finish',
+                        number: 1,
+                        sales: 30
+                    },
+                    {
+                        acNo: 'AC_0002',
+                        acName: '项目2',
+                        level: '二级',
+                        user: '王安全',
+                        role: '条狗',
+                        status: 'pending',
+                        number: 7,
+                        sales: 40
+                    },
+                    {
+                        acNo: 'AC_0002',
+                        acName: '项目2',
+                        level: '二级',
+                        user: '拓子哥',
+                        role: '抢手',
+                        status: 'todo',
+                        number: 2,
+                        sales: 50
+                    },
+                    {
+                        total: true,
+                        acNo: 'AC_0002',
+                        acName: '项目2',
+                        level: '二级',
+                        user: '总计',
+                        role: '-',
+                        status: '-',
+                        number: 111,
+                        sales: 90
+                    }
+                ]
+            };
+        },
+        methods: {
+            getRowClassName({row}) {
+                // 根据行的数据返回相应的类名
+                return row.total ? 'highlight-row' : ''; // 如果姓名为 '李四' 则应用背景色
+            },
+            objectSpanMethod({ row, column, rowIndex }) {
+                if (this.groupProperty.includes(column.property)) { // TODO groupProperty
+                    // 获取当前的值
+                    const currentValue = row[column.property];
+
+                    // 计数变量
+                    let totalRepeatedCount = 1;
+                    let upwardCount = 0;
+
+                    // 向上遍历，以找到相同的值
+                    for (let i = rowIndex - 1; i >= 0; i--) {
+                        if (this.tableData[i][column.property] === currentValue) {
+                            upwardCount++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // 向下遍历以便找到相同的值
+                    for (let i = rowIndex + 1; i < this.tableData.length; i++) {
+                        if (this.tableData[i][column.property] === currentValue) {
+                            totalRepeatedCount++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // 检查是否是 upwardCount >= 1 代表有上面的相同
+                    if (upwardCount > 0) {
+                        return {
+                            rowspan: 1,
+                            colspan: 0  // 不合并列（因为上一行已经合并了）
+                        };
+                    }
+
+                    // 返回合并的行数和列数
+                    return {
+                        rowspan: totalRepeatedCount,
+                        colspan: 1
+                    };
+                }
+                return {
+                    rowspan: 1,
+                    colspan: 1
+                }; // 对于其他列正常显示
+            }
+        }
+    })
+</script>
+</body>
+</html>

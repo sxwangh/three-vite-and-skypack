@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Element UI Group Table with Merged Cells</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-table :data="displayData" style="width: 100%" border :span-method="spanMethod" :row-class-name="getRowClassName">
+        <el-table-column prop="acNo" label="账户编号" width="180"></el-table-column>
+        <el-table-column prop="acName" label="账户名称" width="180"></el-table-column>
+        <el-table-column prop="level" label="级别" width="100"></el-table-column>
+        <el-table-column prop="user" label="用户" width="180"></el-table-column>
+        <el-table-column prop="role" label="角色" width="180"></el-table-column>
+        <el-table-column prop="status" label="状态" width="180"></el-table-column>
+        <el-table-column prop="number" label="数量" width="100"></el-table-column>
+        <el-table-column prop="sales" label="销售额" width="100"></el-table-column>
+    </el-table>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                groupProperty: ['acNo', 'acName', 'level'],
+                tableData: [
+                    {
+                        acNo: 'AC_0001',
+                        acName: '项目1',
+                        level: '一级',
+                        children: [
+                            { user: '王思雪', role: '管理员', status: 'active', number: 2, sales: 100 },
+                            { user: '马里奥', role: '技术人员', status: 'inactive', number: 3, sales: 20 },
+                            { user: '合计', role: '-', status: '-', number: 5, sales: 120, total:true },
+                        ]
+                    },
+                    {
+                        acNo: 'AC_0002',
+                        acName: '项目2',
+                        level: '二级',
+                        children: [
+                            { user: '张张', role: '开发', status: 'completed', number: 1, sales: 30 },
+                            { user: '王安全', role: '条狗', status: 'pending', number: 7, sales: 40 },
+                            { user: '拓子哥', role: '抢手', status: 'todo', number: 2, sales: 50 },
+                            { user: '总计', role: '-', status: '-', number: 10, sales: 120, total:true },
+                        ]
+                    },
+                ]
+            };
+        },
+        computed: {
+            displayData() {
+                const result = [];
+                this.tableData.forEach((item, index) => {
+                    let first = true;
+                    let parentIndex = index;
+                    // 添加子项数据
+                    item.children.forEach(child => {
+                        result.push({
+                            acNo: item.acNo,
+                            acName: item.acName,
+                            level: item.level,
+                            user: child.user,
+                            role: child.role,
+                            status: child.status,
+                            number: child.number,
+                            sales: child.sales,
+                            first,
+                            parentIndex
+                        });
+                        first = false;
+                    });
+                });
+                return result;
+            }
+        },
+        methods: {
+            getRowClassName({row}) {
+                // 根据行的数据返回相应的类名
+                return row.first ? 'highlight-row' : ''; // 如果姓名为 '李四' 则应用背景色
+            },
+            spanMethod({ row, column }) {
+                // 处理合并单元格
+                if (this.groupProperty.includes(column.property)) {
+                    const parentIndex = row.parentIndex;
+                    const parent = this.tableData[parentIndex];
+                    if (row.first) {
+                        // 返回合并行数
+                        const rowSpan = parent.children.length; // 所有子行
+                        return [rowSpan, 1]; // 合并到这一行
+                    } else {
+                        return [0, 0]; // 子行不显示
+                    }
+                }
+                return [1, 1]; // 其他列的单元格不合并，尺寸为1行1列
+            }
+        }
+    });
+</script>
+</body>
+</html>
